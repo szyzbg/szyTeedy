@@ -111,111 +111,179 @@
     <script src="app/docs/directive/InvertTextColor.js" type="text/javascript"></script>
     <!-- endref -->
   </head>
-  <body translate-cloak ng-cloak>
-    <onboarding-popover ng-if="onboardingEnabled" enabled="onboardingEnabled" steps="onboardingSteps"></onboarding-popover>
+  <body translate-cloak ng-cloak style="display: flex; min-height: 100vh;">
+  <!-- 侧边导航栏 -->
+  <aside style="width: 260px; background: #2f3542; padding: 25px; position: fixed; height: 100%;">
+    <!-- 品牌标识 -->
+    <div class="brand" style="margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #404859;">
+      <a href="#" style="display: flex; align-items: center; text-decoration: none;">
+        <span ng-if="appName == 'Teedy'" style="font-size: 24px; color: #4bcffa; font-weight: 300;">teedy</span>
+        <span ng-if="appName != 'Teedy'" style="font-size: 20px; color: #a4b0be;">{{ appName }}</span>
+      </a>
+    </div>
 
-    <nav class="navbar navbar-default" role="navigation" ng-controller="Navigation">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle"
-                ng-init="isCollapsed = true"
-                ng-click="isCollapsed = !isCollapsed">
-          <span class="sr-only">{{ 'index.toggle_navigation' | translate }}</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
+    <!-- 主菜单 -->
+    <nav ng-controller="Navigation" style="margin-bottom: 30px;">
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <li style="margin-bottom: 8px;">
+          <a href="#/document" 
+             style="display: flex; 
+                    align-items: center;
+                    padding: 12px 20px;
+                    color: #dfe4ea;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                    text-decoration: none;"
+             ui-sref-active="{ 'menu-active': 'document.**' }"
+             hover-style="background: #3d4a5c;">
+            <span class="fas fa-book" style="width: 25px; font-size: 16px;"></span>
+            {{ 'index.nav_documents' | translate }}
+          </a>
+        </li>
+        <li style="margin-bottom: 8px;">
+          <a href="#/tag" 
+             style="display: flex; 
+                    align-items: center;
+                    padding: 12px 20px;
+                    color: #dfe4ea;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                    text-decoration: none;"
+             ui-sref-active="{ 'menu-active': 'tag.**' }"
+             hover-style="background: #3d4a5c;">
+            <span class="fas fa-tags" style="width: 25px; font-size: 16px;"></span>
+            {{ 'index.nav_tags' | translate }}
+          </a>
+        </li>
+        <li style="margin-bottom: 8px;">
+          <a href="#/user" 
+             style="display: flex; 
+                    align-items: center;
+                    padding: 12px 20px;
+                    color: #dfe4ea;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                    text-decoration: none;"
+             ui-sref-active="{ 'menu-active': 'user.**', 'menu-active2': 'group.**' }"
+             hover-style="background: #3d4a5c;">
+            <span class="fas fa-users" style="width: 25px; font-size: 16px;"></span>
+            {{ 'index.nav_users_groups' | translate }}
+          </a>
+        </li>
+      </ul>
+    </nav>
 
-        <a class="navbar-brand" href="#">
-          <span ng-if="appName == 'Teedy'">
-            <span style="color: #2aabd2;">teedy</span>
-          </span>
-          <span ng-if="appName != 'Teedy'" style="color: #888;">{{ appName }}</span>
+    <!-- 用户面板 -->
+    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 25px; background: #262b35;">
+      <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <div style="flex: 1;">
+          <div style="color: #f1f2f6; font-size: 14px; margin-bottom: 2px;">
+            <span class="fas fa-user" style="margin-right: 8px;"></span>
+            {{ userInfo.username }}
+          </div>
+          <div style="font-size: 12px; color: #747d8c;">
+            {{ 'index.logged_as' | translate:{ username: userInfo.username } }}
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; gap: 8px;">
+        <a ng-show="userInfo.username != 'guest'"
+           href="#/settings/account" 
+           style="display: flex;
+                  align-items: center;
+                  padding: 10px 15px;
+                  background: rgba(255,255,255,0.1);
+                  color: #a4b0be;
+                  border-radius: 6px;
+                  text-decoration: none;
+                  transition: all 0.2s;"
+           hover-style="background: #4bcffa; color: white;">
+          <span class="fas fa-cog" style="margin-right: 10px;"></span>
+          {{ 'index.nav_settings' | translate }}
+        </a>
+        
+        <a href="#" 
+           ng-click="logout($event)"
+           style="display: flex;
+                  align-items: center;
+                  padding: 10px 15px;
+                  background: #ff6b6b;
+                  color: white;
+                  border-radius: 6px;
+                  text-decoration: none;
+                  transition: all 0.2s;"
+           hover-style="background: #ff5252;">
+          <span class="fas fa-sign-out-alt" style="margin-right: 10px;"></span>
+          {{ 'index.logout' | translate }}
         </a>
       </div>
+    </div>
+  </aside>
 
-      <div class="collapse navbar-collapse" uib-collapse="isCollapsed">
-        <ul class="nav navbar-nav" ng-show="!userInfo.anonymous">
-          <li ui-sref-active="{ active: 'document.**' }">
-            <a href="#/document"><span class="fas fa-book"></span> {{ 'index.nav_documents' | translate }}</a>
-          </li>
-          <li ui-sref-active="{ active: 'tag.**' }" id="navigation-tag">
-            <a href="#/tag"><span class="fas fa-tags"></span> {{ 'index.nav_tags' | translate }}</a>
-          </li>
-          <li ui-sref-active="{ active: 'user.**', active2: 'group.**' }">
-            <a href="#/user"><span class="fas fa-user"></span> {{ 'index.nav_users_groups' | translate }}</a>
-          </li>
-        </ul>
+  <!-- 主内容区 -->
+  <main style="flex: 1; margin-left: 260px; padding: 40px 30px; background: #f8f9fa; min-height: 100vh;">
+    <onboarding-popover ng-if="onboardingEnabled" enabled="onboardingEnabled" steps="onboardingSteps"></onboarding-popover>
 
-        <ul class="nav navbar-nav navbar-right" ng-show="!userInfo.anonymous">
-          <li>
-            <a href="{{ userInfo.username == 'guest' ? '#/user/guest' : '#/settings/account' }}"
-               translate-attr="{ title: 'index.logged_as' }" translate-values="{ username: userInfo.username }">
-              <span class="fas fa-user"></span>
-              {{ userInfo.username }}
-            </a>
-          </li>
-          <li ui-sref-active="{ active: 'settings.**' }" ng-show="userInfo.username != 'guest'">
-            <a href="#/settings/account">
-              <span class="fas fa-cog"></span> {{ 'index.nav_settings' | translate }}
-            </a>
-          </li>
-          <li>
-            <a href="#" ng-click="logout($event)">
-              <span class="fas fa-power-off"></span> {{ 'index.logout' | translate }}
-            </a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    
-    <div ui-view="page">
+    <!-- 页面内容 -->
+    <div ui-view="page" style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.03);"></div>
+
+    <!-- 页脚 -->
+    <!-- 修改后的页脚部分 -->
+<footer ng-controller="Footer" style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #e9ecef;">
+  <div class="alert alert-danger" 
+       ng-show="app.global_storage_quota && app.global_storage_quota * 0.8 < app.global_storage_current"
+       style="border-radius: 8px; border: none;"
+       translate="index.global_quota_warning"
+       translate-values="{ current: app.global_storage_current / 1000000, percent: app.global_storage_current / app.global_storage_quota * 100, total: app.global_storage_quota / 1000000 }">
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; color: #6c757d; font-size: 14px;">
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <span translate="document.default.footer_sismics"></span>
+      <a href="apidoc/" style="color: #4bcffa; text-decoration: none;">
+        {{ 'document.default.api_documentation' | translate }}
+      </a>
     </div>
 
-    <div class="row" ng-controller="Footer">
-      <div class="col-md-12 footer text-center text-muted small">
-        <div class="alert alert-danger" ng-show="app.global_storage_quota && app.global_storage_quota * 0.8 < app.global_storage_current"
-             translate="index.global_quota_warning"
-             translate-values="{ current: app.global_storage_current / 1000000, percent: app.global_storage_current / app.global_storage_quota * 100, total: app.global_storage_quota / 1000000 }">
-        </div>
-        <ul class="list-inline">
-          <li uib-dropdown class="dropdown">
-            <a href uib-dropdown-toggle>
-              <span ng-switch="currentLang">
-                <span ng-switch-when="en">English</span>
-                <span ng-switch-when="fr">Français</span>
-                <span ng-switch-when="de">Deutsch</span>
-                <span ng-switch-when="it">Italiano</span>
-                <span ng-switch-when="es">Española</span>
-                <span ng-switch-when="pt">Português</span>
-                <span ng-switch-when="el">Ελληνικά</span>
-                <span ng-switch-when="ru">Pусский</span>
-                <span ng-switch-when="pl">Polski</span>
-                <span ng-switch-when="zh_CN">简体中文</span>
-                <span ng-switch-when="zh_TW">繁體中文</span>
-                <span ng-switch-when="sq_AL">Shqip</span>
-              </span>
-              <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href ng-click="changeLanguage('en')" ng-class="{ 'bg-info': currentLang == 'en' }">English</a></li>
-              <li><a href ng-click="changeLanguage('fr')" ng-class="{ 'bg-info': currentLang == 'fr' }">Français</a></li>
-              <li><a href ng-click="changeLanguage('de')" ng-class="{ 'bg-info': currentLang == 'de' }">Deutsch</a></li>
-              <li><a href ng-click="changeLanguage('it')" ng-class="{ 'bg-info': currentLang == 'it' }">Italiano</a></li>
-              <li><a href ng-click="changeLanguage('es')" ng-class="{ 'bg-info': currentLang == 'es' }">Española</a></li>
-              <li><a href ng-click="changeLanguage('pt')" ng-class="{ 'bg-info': currentLang == 'pt' }">Português</a></li>
-              <li><a href ng-click="changeLanguage('el')" ng-class="{ 'bg-info': currentLang == 'el' }">Ελληνικά</a></li>
-              <li><a href ng-click="changeLanguage('ru')" ng-class="{ 'bg-info': currentLang == 'ru' }">Pусский</a></li>
-              <li><a href ng-click="changeLanguage('pl')" ng-class="{ 'bg-info': currentLang == 'pl' }">Polski</a></li>              
-			        <li><a href ng-click="changeLanguage('zh_CN')" ng-class="{ 'bg-info': currentLang == 'zh_CN' }">简体中文</a></li>
-              <li><a href ng-click="changeLanguage('zh_TW')" ng-class="{ 'bg-info': currentLang == 'zh_TW' }">繁體中文</a></li>
-              <li><a href ng-click="changeLanguage('sq_AL')" ng-class="{ 'bg-info': currentLang == 'sq_AL' }">Shqip</a></li>
-            </ul>
-          </li>
-          <li translate="document.default.footer_sismics"></li>
-          <li><a href="apidoc/">{{ 'document.default.api_documentation' | translate }}</a></li>
-          <li>v{{ app.current_version }}</li>
-        </ul>
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <!-- 横向语言按钮 -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button ng-repeat="lang in ['en','fr','de','it','es','pt','el','ru','pl','zh_CN','zh_TW','sq_AL']"
+                ng-click="changeLanguage(lang)"
+                style="padding: 6px 12px;
+                       border: 1px solid #dee2e6;
+                       border-radius: 18px;
+                       background: {{ currentLang === lang ? '#4bcffa' : 'transparent' }};
+                       color: {{ currentLang === lang ? 'white' : '#495057' }};
+                       transition: all 0.2s;
+                       cursor: pointer;
+                       font-size: 13px;
+                       white-space: nowrap;"
+                hover-style="border-color: #4bcffa;">
+          <span ng-switch="lang">
+            <span ng-switch-when="en">EN</span>
+            <span ng-switch-when="fr">FR</span>
+            <span ng-switch-when="de">DE</span>
+            <span ng-switch-when="it">IT</span>
+            <span ng-switch-when="es">ES</span>
+            <span ng-switch-when="pt">PT</span>
+            <span ng-switch-when="el">EL</span>
+            <span ng-switch-when="ru">RU</span>
+            <span ng-switch-when="pl">PL</span>
+            <span ng-switch-when="zh_CN">简中</span>
+            <span ng-switch-when="zh_TW">繁中</span>
+            <span ng-switch-when="sq_AL">SQ</span>
+          </span>
+        </button>
+      </div>
+
+      <div style="color: #868e96; font-size: 13px;">
+        v{{ app.current_version }}
       </div>
     </div>
-  </body>
+  </div>
+</footer>
+  </main>
+</body>
 </html>
