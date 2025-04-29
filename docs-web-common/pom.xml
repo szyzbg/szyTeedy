@@ -128,6 +128,15 @@
           </execution>
         </executions>
       </plugin>
+    <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-site-plugin</artifactId>
+    <version>3.12.1</version>
+    <configuration>
+        <!-- 将站点输出到父模块的 target/site/submodules 目录 -->
+        <outputDirectory>${project.parent.basedir}/target/site/${project.artifactId}</outputDirectory>
+    </configuration>
+    </plugin>
     </plugins>
   </build>
 </project>
