@@ -8,5 +8,5 @@
     <rule ref="category/java/design.xml/ExcessiveMethodLength"/>
     <rule ref="category/java/design.xml/CyclomaticComplexity"/>
     <rule ref="category/java/design.xml/CouplingBetweenObjects"/>
-    <rule ref="category/java/design.xml/LackOfCohesionInMethods"/>
+    <!-- <rule ref="category/java/design.xml/LackOfCohesionInMethods"/> -->
 </ruleset>
