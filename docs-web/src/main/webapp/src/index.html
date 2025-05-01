@@ -155,6 +155,54 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* 注册模块切换效果 */
+.registration-section {
+    margin: 30px 0;
+    transition: all 0.3s ease;
+}
+
+/* 触发按钮样式 */
+.btn-primary {
+    background: linear-gradient(145deg, #4682B4, #6CA6CD);
+    padding: 12px 25px;
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(70, 130, 180, 0.3);
+}
+
+/* 表单头部 */
+.form-header {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.btn-close {
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    color: #666;
+    opacity: 0.7;
+}
+
+.btn-close:hover {
+    color: #4682B4;
+}
+
+/* 表单操作按钮 */
+.form-actions {
+    margin-top: 25px;
+    text-align: right;
+}
+
+.form-actions .btn {
+    margin-left: 10px;
+    border-radius: 15px;
+    padding: 8px 20px;
+}
     </style>
 </head>
 
@@ -225,6 +273,7 @@
 
     <!-- 主内容区 -->
     <div class="container-fluid main-content">
+        
         <!-- 存储配额警告提升到内容区顶部 -->
         <div class="global-storage-alert">
             <div class="alert alert-danger" 
@@ -240,6 +289,77 @@
         
         <!-- 动态内容视图 -->
         <div ui-view="page" class="animated-fade"></div>
+<!-- 修改后的注册模块 -->
+<div class="registration-section" ng-if="!userInfo.anonymous">
+    <!-- 注册触发按钮 -->
+    <div class="row" ng-show="!showRegistrationForm">
+        <div class="col-md-2 col-md-offset-5">
+            <button class="btn btn-primary btn-block" 
+                    ng-click="showRegistrationForm = true"
+                    style="border-radius: 20px;">
+                <span class="fas fa-user-plus"></span> 立即注册
+            </button>
+        </div>
+    </div>
+
+    <!-- 注册表单内容 -->
+    <div class="row" ng-show="showRegistrationForm">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="registration-box">
+                <!-- 表单标题 -->
+                <div class="form-header">
+                    <h3 class="text-center" style="color: #4682B4; margin-bottom: 25px;">
+                        <span class="fas fa-user-plus"></span> 创建新账户
+                    </h3>
+                    <button class="btn btn-link btn-close" 
+                            ng-click="showRegistrationForm = false">
+                        <span class="fas fa-times"></span>
+                    </button>
+                </div>
+                
+                <!-- 注册表单 -->
+                <form class="registration-form">
+                    <!-- 表单字段保持原有结构不变 -->
+                    <div class="form-group">
+                        <input type="text" class="form-control" 
+                               placeholder="用户名"
+                               ng-model="regData.username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="email" class="form-control" 
+                               placeholder="邮箱地址"
+                               ng-model="regData.email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="password" class="form-control" 
+                               placeholder="密码"
+                               ng-model="regData.password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="password" class="form-control" 
+                               placeholder="确认密码"
+                               ng-model="regData.confirmPassword">
+                    </div>
+                    
+                    <!-- 表单操作按钮 -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-default" 
+                                ng-click="showRegistrationForm = false">
+                            取消
+                        </button>
+                        <button type="submit" class="btn btn-primary" 
+                                ng-click="register()">
+                            <span class="fas fa-check-circle"></span> 立即注册
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
     </div>
 
     <!-- 页脚 -->
