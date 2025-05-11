@@ -1,0 +1,37 @@
+package com.sismics.docs.core.model.jpa;
+
+import javax.persistence.*;
+import java.util.Date;
+
+@Entity
+@Table(name = "T_USER_REGISTRATION_REQUEST")
+public class UserRegistrationRequest {
+    @Id
+    @Column(name = "URR_ID_C", length = 36)
+    private String id;
+
+    @Column(name = "URR_USERNAME_C", length = 50, nullable = false)
+    private String username;
+
+    @Column(name = "URR_PASSWORD_C", nullable = false)
+    private String password;
+
+    @Column(name = "URR_EMAIL_C", length = 100)
+    private String email;
+
+    @Column(name = "URR_STATUS_C", nullable = false)
+    private String status; // PENDING, APPROVED, REJECTED
+
+    @Column(name = "URR_CREATEDATE_D", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createDate;
+
+    @Column(name = "URR_DECISIONDATE_D")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date decisionDate;
+
+    @Column(name = "URR_ADMIN_ID_C", length = 36)
+    private String adminId;
+
+    // Getters and Setters
+}

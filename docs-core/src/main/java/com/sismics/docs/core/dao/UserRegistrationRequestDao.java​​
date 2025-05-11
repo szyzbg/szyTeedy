@@ -1,0 +1,58 @@
+package com.sismics.docs.core.dao;
+
+import com.sismics.docs.core.model.jpa.UserRegistrationRequest;
+import com.sismics.util.context.ThreadLocalContext;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+public class UserRegistrationRequestDao {
+    public String create(UserRegistrationRequest request) {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        request.setId(UUID.randomUUID().toString());
+        request.setCreateDate(new Date());
+        request.setStatus("PENDING");
+        em.persist(request);
+        return request.getId();
+    }
+
+    public List<UserRegistrationRequest> getPendingRequests() {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        return em.createQuery(
+            "SELECT r FROM UserRegistrationRequest r WHERE r.status = 'PENDING'", 
+            UserRegistrationRequest.class)
+            .getResultList();
+    }
+
+    public UserRegistrationRequest getById(String id) {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT r FROM UserRegistrationRequest r WHERE r.id = :id", 
+                UserRegistrationRequest.class)
+                .setParameter("id", id)
+                .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    public void approveRequest(UserRegistrationRequest request, String adminId) {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        request.setStatus("APPROVED");
+        request.setDecisionDate(new Date());
+        request.setAdminId(adminId);
+        em.merge(request);
+    }
+
+    public void rejectRequest(UserRegistrationRequest request, String adminId) {
+        EntityManager em = ThreadLocalContext.get().getEntityManager();
+        request.setStatus("REJECTED");
+        request.setDecisionDate(new Date());
+        request.setAdminId(adminId);
+        em.merge(request);
+    }
+}
