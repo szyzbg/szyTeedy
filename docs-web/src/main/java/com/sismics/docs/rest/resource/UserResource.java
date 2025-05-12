@@ -75,6 +75,129 @@ public class UserResource extends BaseResource {
      * @param email E-Mail
      * @return Response
      */
+
+     @POST
+@Path("/request")
+public Response createRegistrationRequest(
+    @FormParam("username") String username,
+    @FormParam("password") String password,
+    @FormParam("email") String email) {
+
+    // 验证输入数据
+    username = ValidationUtil.validateLength(username, "username", 3, 50);
+    ValidationUtil.validateUsername(username, "username");
+    password = ValidationUtil.validateLength(password, "password", 8, 50);
+    email = ValidationUtil.validateLength(email, "email", 1, 100);
+    ValidationUtil.validateEmail(email, "email");
+
+    // 检查用户名是否已存在
+    UserDao userDao = new UserDao();
+    if (userDao.getActiveByUsername(username) != null) {
+        throw new ClientException("AlreadyExistingUsername", "Username already exists");
+    }
+
+    // 创建注册请求
+    UserRegistrationRequest request = new UserRegistrationRequest();
+    request.setUsername(username);
+    request.setPassword(password);
+    request.setEmail(email);
+
+    UserRegistrationRequestDao requestDao = new UserRegistrationRequestDao();
+    String requestId = requestDao.create(request);
+
+    return Response.ok(Json.createObjectBuilder().add("status", "ok").build()).build();
+}
+
+
+@GET
+@Path("/requests")
+public Response listRegistrationRequests() {
+    if (!authenticate() || !hasBaseFunction(BaseFunction.ADMIN)) {
+        throw new ForbiddenClientException();
+    }
+
+    UserRegistrationRequestDao requestDao = new UserRegistrationRequestDao();
+    List<UserRegistrationRequest> requests = requestDao.getPendingRequests();
+
+    JsonArrayBuilder requestsJson = Json.createArrayBuilder();
+    for (UserRegistrationRequest request : requests) {
+        requestsJson.add(Json.createObjectBuilder()
+            .add("id", request.getId())
+            .add("username", request.getUsername())
+            .add("email", request.getEmail())
+            .add("createDate", request.getCreateDate().getTime()));
+    }
+
+    return Response.ok(Json.createObjectBuilder().add("requests", requestsJson).build()).build();
+}
+
+@GET
+@Path("/requests")
+public Response listRegistrationRequests() {
+    if (!authenticate() || !hasBaseFunction(BaseFunction.ADMIN)) {
+        throw new ForbiddenClientException();
+    }
+
+    UserRegistrationRequestDao requestDao = new UserRegistrationRequestDao();
+    List<UserRegistrationRequest> requests = requestDao.getPendingRequests();
+
+    JsonArrayBuilder requestsJson = Json.createArrayBuilder();
+    for (UserRegistrationRequest request : requests) {
+        requestsJson.add(Json.createObjectBuilder()
+            .add("id", request.getId())
+            .add("username", request.getUsername())
+            .add("email", request.getEmail())
+            .add("createDate", request.getCreateDate().getTime()));
+    }
+
+    return Response.ok(Json.createObjectBuilder().add("requests", requestsJson).build()).build();
+}
+
+@POST
+@Path("/request/{requestId}/approve")
+public Response approveRegistrationRequest(@PathParam("requestId") String requestId) {
+    if (!authenticate() || !hasBaseFunction(BaseFunction.ADMIN)) {
+        throw new ForbiddenClientException();
+    }
+
+    UserRegistrationRequestDao requestDao = new UserRegistrationRequestDao();
+    UserRegistrationRequest request = requestDao.getById(requestId);
+    if (request == null || !"PENDING".equals(request.getStatus())) {
+        throw new ClientException("RequestNotFound", "Registration request not found");
+    }
+
+    // 创建用户
+    UserDao userDao = new UserDao();
+    User user = new User();
+    user.setUsername(request.getUsername());
+    user.setPassword(request.getPassword()); // 使用加密后的密码
+    user.setEmail(request.getEmail());
+    user.setRoleId(Constants.DEFAULT_USER_ROLE);
+    userDao.create(user, principal.getId());
+
+    // 更新请求状态
+    requestDao.approveRequest(request, principal.getId());
+
+    return Response.ok(Json.createObjectBuilder().add("status", "ok").build()).build();
+}
+
+@POST
+@Path("/request/{requestId}/reject")
+public Response rejectRegistrationRequest(@PathParam("requestId") String requestId) {
+    if (!authenticate() || !hasBaseFunction(BaseFunction.ADMIN)) {
+        throw new ForbiddenClientException();
+    }
+
+    UserRegistrationRequestDao requestDao = new UserRegistrationRequestDao();
+    UserRegistrationRequest request = requestDao.getById(requestId);
+    if (request == null || !"PENDING".equals(request.getStatus())) {
+        throw new ClientException("RequestNotFound", "Registration request not found");
+    }
+
+    requestDao.rejectRequest(request, principal.getId());
+
+    return Response.ok(Json.createObjectBuilder().add("status", "ok").build()).build();
+}
     @PUT
     public Response register(
         @FormParam("username") String username,
