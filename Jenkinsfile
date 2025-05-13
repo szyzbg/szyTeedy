@@ -1,39 +1,50 @@
 pipeline {
-agent any
-environment {
-// define environment variable
-// Jenkins credentials configuration
-DOCKER_HUB_CREDENTIALS = credentials('dockerhub_credentials') // Docker Hub credentials ID store in Jenkins
-// Docker Hub Repository's name
-DOCKER_IMAGE = 'sismics/docs:v1.11' // your Docker Hub user name and Repository's name
-DOCKER_TAG = "${env.BUILD_NUMBER}" // use build number as tag
-}
-stages {
-stage('Start Minikube') {
-steps {
-sh '''
-if ! minikube status | grep -q "Running"; then
-echo "Starting Minikube..."
-minikube start --force
-else
-echo "Minikube already running."
-fi
-'''
-}
-}
-  stage('Set Image') {
-steps {
-sh '''
-echo "Setting image for deployment..."
-kubectl set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${IMAGE_N}
-'''
-}
-}
-stage('Verify') {
-steps {
-sh 'kubectl rollout status deployment/${DEPLOYMENT_NAME}'
-sh 'kubectl get pods'
-}
-}
-}
+    agent any
+    environment {
+        // 定义环境变量
+        DEPLOYMENT_NAME = "teedy-deployment"  // 替换为你的K8s部署名称
+        CONTAINER_NAME = "teedy-container"    // 替换为你的容器名称
+        TEEDY_IMAGE = "sismics/docs:v1.11"    // 使用官方Teedy镜像
+    }
+    
+    stages {
+        stage('Start Minikube') {
+            steps {
+                sh '''
+                if ! minikube status | grep -q "Running"; then
+                    echo "Starting Minikube..."
+                    minikube start --force
+                else
+                    echo "Minikube already running."
+                fi
+                '''
+            }
+        }
+
+        stage('Update Deployment') {
+            steps {
+                sh """
+                # 更新部署使用指定镜像
+                kubectl set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${TEEDY_IMAGE}
+                """
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh """
+                kubectl rollout status deployment/${DEPLOYMENT_NAME}
+                kubectl get pods -l app=${DEPLOYMENT_NAME}
+                echo "Deployment verification completed!"
+                """
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Cleaning up..."
+            sh 'kubectl get deployments'
+        }
+    }
 }
