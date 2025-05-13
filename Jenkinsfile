@@ -25,7 +25,8 @@ stage('Set Image') {
 steps {
 sh '''
 echo "Setting image for deployment..."
-kubectl set image deployment/hello-node4 docs=sismics/docs:latest
+//kubectl set image deployment/hello-node4 docs=sismics/docs:latest
+kubectl get services
 '''
 }
 }
