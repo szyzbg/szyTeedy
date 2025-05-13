@@ -30,8 +30,8 @@ echo "Setting image for deployment..."
 }
 stage('Verify') {
 steps {
-sh 'kubectl rollout status deployment/hello-node4 --force'
-sh 'kubectl get pods --force'
+sh 'kubectl rollout status deployment/hello-node4'
+sh 'kubectl get pods'
 }
 }
 }
