@@ -1,12 +1,13 @@
 pipeline {
     agent any
     environment {
-        // 定义环境变量
-        DEPLOYMENT_NAME = "teedy-deployment"  // 替换为你的K8s部署名称
-        CONTAINER_NAME = "teedy-container"    // 替换为你的容器名称
-        TEEDY_IMAGE = "sismics/docs:v1.11"    // 使用官方Teedy镜像
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub_credentials')
+        DOCKER_IMAGE = 'sismics/docs:v1.11'  // 修改镜像地址
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
+        // 新增必要变量
+        DEPLOYMENT_NAME = 'your-deployment'  // 需替换实际部署名称
+        CONTAINER_NAME = 'your-container'    // 需替换实际容器名称
     }
-    
     stages {
         stage('Start Minikube') {
             steps {
@@ -17,34 +18,33 @@ pipeline {
                 else
                     echo "Minikube already running."
                 fi
+                # 添加上下文配置
+                minikube update-context >/dev/null 2>&1
                 '''
             }
         }
 
-        stage('Update Deployment') {
+        stage('Set Image') {
             steps {
                 sh """
-                # 更新部署使用指定镜像
-                kubectl set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${TEEDY_IMAGE}
+                # 修复变量引用并添加重试
+                for i in {1..3}; do
+                    echo "Attempt \$i: Setting image for deployment..."
+                    kubectl set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${DOCKER_IMAGE} && break
+                    sleep 15
+                done
                 """
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Verify') {
             steps {
-                sh """
-                kubectl rollout status deployment/${DEPLOYMENT_NAME}
-                kubectl get pods -l app=${DEPLOYMENT_NAME}
-                echo "Deployment verification completed!"
-                """
+                sh '''
+                # 添加超时参数
+                kubectl rollout status deployment/${DEPLOYMENT_NAME} --timeout=120s
+                kubectl get pods
+                '''
             }
-        }
-    }
-
-    post {
-        always {
-            echo "Cleaning up..."
-            sh 'kubectl get deployments'
         }
     }
 }
