@@ -25,13 +25,13 @@ stage('Set Image') {
 steps {
 sh '''
 echo "Setting image for deployment..."
-kubectl set image deployment/${DEPLOYMENT_NAME} ${CONTAINER_NAME}=${IMAGE_N}
+kubectl set image deployment/hello-node4 docs=sismics/docs:latest
 '''
 }
 }
 stage('Verify') {
 steps {
-sh 'kubectl rollout status deployment/${DEPLOYMENT_NAME}'
+sh 'kubectl rollout status deployment/hello-node4'
 sh 'kubectl get pods'
 }
 }
